@@ -5,7 +5,14 @@ import { db } from '../firebase';
 import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
 import { Image as ImageIcon, Video as VideoIcon, Loader2, Sparkles } from 'lucide-react';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let ai: GoogleGenAI | null = null;
+try {
+  if (process.env.GEMINI_API_KEY) {
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+} catch (e) {
+  console.error("Failed to initialize Gemini API", e);
+}
 
 export default function Create() {
   const { user, profile } = useAuth();
@@ -23,6 +30,10 @@ export default function Create() {
     setResult(null);
 
     try {
+      if (!ai) {
+        throw new Error('Gemini API key is missing. Please set GEMINI_API_KEY in your Vercel Environment Variables.');
+      }
+
       // Check credits
       if (type === 'image' && profile.imagesLeft <= 0) {
         throw new Error('No image credits left. Please upgrade to Premium.');
