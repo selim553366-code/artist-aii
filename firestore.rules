@@ -1,0 +1,120 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function uidUnchanged() {
+      return !('authorId' in request.resource.data) || request.resource.data.authorId == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    
+    function isValidUser() {
+      return request.resource.data.displayName is string &&
+             request.resource.data.plan in ['standard', 'premium'] &&
+             request.resource.data.imagesLeft is number &&
+             request.resource.data.videosLeft is number &&
+             request.resource.data.followersCount is number &&
+             request.resource.data.followingCount is number;
+    }
+
+    function isValidPost() {
+      return request.resource.data.authorId == request.auth.uid &&
+             request.resource.data.authorName is string &&
+             request.resource.data.mediaUrl is string &&
+             request.resource.data.mediaType in ['image', 'video'] &&
+             request.resource.data.prompt is string &&
+             request.resource.data.likesCount is number &&
+             request.resource.data.commentsCount is number &&
+             request.resource.data.createdAt is number;
+    }
+
+    function isValidLike() {
+      return request.resource.data.postId is string &&
+             request.resource.data.userId == request.auth.uid &&
+             request.resource.data.createdAt is number;
+    }
+
+    function isValidComment() {
+      return request.resource.data.postId is string &&
+             request.resource.data.authorId == request.auth.uid &&
+             request.resource.data.authorName is string &&
+             request.resource.data.text is string &&
+             request.resource.data.text.size() > 0 &&
+             request.resource.data.text.size() <= 500 &&
+             request.resource.data.createdAt is number;
+    }
+
+    function isValidFollow() {
+      return request.resource.data.followerId == request.auth.uid &&
+             request.resource.data.followingId is string &&
+             request.resource.data.createdAt is number;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId) && isValidUser();
+      allow update: if isOwner(userId) && isValidUser();
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPost();
+      allow update: if isAuthenticated() && 
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount']));
+      allow delete: if isDocOwner();
+    }
+
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidLike() && likeId == request.resource.data.postId + '_' + request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidComment();
+      allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidFollow() && followId == request.resource.data.followerId + '_' + request.resource.data.followingId;
+      allow delete: if isAuthenticated() && resource.data.followerId == request.auth.uid;
+    }
+
+    match /dailyChallenges/{date} {
+      allow read: if true;
+      allow write: if isAuthenticated(); // Allow anyone to bootstrap for demo purposes
+    }
+  }
+}

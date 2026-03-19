@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the Artist AI platform.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "plan": { "type": "string", "enum": ["standard", "premium"] },
+        "imagesLeft": { "type": "number" },
+        "videosLeft": { "type": "number" },
+        "followersCount": { "type": "number" },
+        "followingCount": { "type": "number" }
+      },
+      "required": ["displayName", "plan", "imagesLeft", "videosLeft", "followersCount", "followingCount"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "An AI generated image or video post.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["image", "video"] },
+        "prompt": { "type": "string" },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["authorId", "authorName", "mediaUrl", "mediaType", "prompt", "likesCount", "commentsCount", "createdAt"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "A like on a post.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["postId", "userId", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a post.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["postId", "authorId", "authorName", "text", "createdAt"]
+    },
+    "Follow": {
+      "title": "Follow",
+      "description": "A user following another user.",
+      "type": "object",
+      "properties": {
+        "followerId": { "type": "string" },
+        "followingId": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["followerId", "followingId", "createdAt"]
+    },
+    "DailyChallenge": {
+      "title": "DailyChallenge",
+      "description": "A daily prompt challenge.",
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["prompt", "description", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles and subscription status."
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Stores generated posts."
+    },
+    "/likes/{likeId}": {
+      "schema": { "$ref": "#/entities/Like" },
+      "description": "Stores likes on posts."
+    },
+    "/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "Stores comments on posts."
+    },
+    "/follows/{followId}": {
+      "schema": { "$ref": "#/entities/Follow" },
+      "description": "Stores follow relationships."
+    },
+    "/dailyChallenges/{date}": {
+      "schema": { "$ref": "#/entities/DailyChallenge" },
+      "description": "Stores daily challenges."
+    }
+  }
+}
