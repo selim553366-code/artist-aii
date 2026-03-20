@@ -23,11 +23,11 @@ const CATEGORIES = [
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 const OPTIONS: Record<CategoryId, string[]> = {
-  top: ['shortHairShortFlat', 'shortHairShortRound', 'shortHairShortWaved', 'shortHairSides', 'shortHairTheCaesar', 'shortHairTheCaesarSidePart', 'longHairBigHair', 'longHairBob', 'longHairBun', 'longHairCurly', 'longHairCurvy', 'longHairDreads', 'longHairFrida', 'longHairFro', 'longHairFroBand', 'longHairNotTooLong', 'longHairShavedSides', 'longHairMiaWallace', 'longHairStraight', 'longHairStraight2', 'longHairStraightStrand', 'noHair', 'eyepatch', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat2', 'winterHat3', 'winterHat4'],
+  top: ['shortFlat', 'shortRound', 'shortWaved', 'sides', 'theCaesar', 'theCaesarAndSidePart', 'bigHair', 'bob', 'bun', 'curly', 'curvy', 'dreads', 'frida', 'fro', 'froBand', 'longButNotTooLong', 'miaWallace', 'shavedSides', 'straight02', 'straight01', 'straightAndStrand', 'dreads01', 'dreads02', 'frizzle', 'shaggy', 'shaggyMullet', 'shortCurly', 'hat', 'hijab', 'turban', 'winterHat1', 'winterHat02', 'winterHat03', 'winterHat04'],
   face: ['default', 'smile', 'cry', 'dizzy', 'rollEyes', 'surprised', 'wink', 'winkWacky', 'squint', 'sad'],
   clothing: ['shirtCrewNeck', 'blazerAndShirt', 'blazerAndSweater', 'collarAndSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtScoopNeck', 'shirtVNeck'],
-  accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'],
-  facialHair: ['blank', 'beardMedium', 'beardLight', 'beardMajestic', 'moustaceMagnum', 'moustacheFancy'],
+  accessories: ['blank', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers', 'eyepatch'],
+  facialHair: ['blank', 'beardMedium', 'beardLight', 'beardMajestic', 'moustacheMagnum', 'moustacheFancy'],
   shoes: ['default', 'nike', 'gucci'],
   brand: ['none', 'nike', 'gucci']
 };

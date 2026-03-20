@@ -9,7 +9,7 @@ export interface AvatarConfig {
 }
 
 export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
-  top: 'shortHairShortFlat',
+  top: 'shortFlat',
   face: 'default',
   accessories: 'blank',
   clothing: 'shirtCrewNeck',
@@ -18,27 +18,80 @@ export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
   brand: 'none'
 };
 
+const fetchAndEmbedImage = async (url: string, x: number, y: number, width: number, height: number): Promise<string> => {
+  if (!url) return '';
+  try {
+    if (url.startsWith('<svg')) {
+      return `<g transform="translate(${x}, ${y}) scale(${width/100})">${url}</g>`;
+    }
+    const res = await fetch(url);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('svg')) {
+      const svgText = await res.text();
+      // Simple scaling, assuming the SVG can scale or we just wrap it
+      return `<g transform="translate(${x}, ${y}) scale(${width/100})">${svgText}</g>`;
+    } else {
+      const blob = await res.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      return `<image href="${base64}" x="${x}" y="${y}" width="${width}" height="${height}" />`;
+    }
+  } catch (e) {
+    console.error('Failed to embed image:', e);
+    return `<image href="${url}" x="${x}" y="${y}" width="${width}" height="${height}" />`;
+  }
+};
+
 export const generateCompositeAvatar = async (uid: string, config: AvatarConfig): Promise<string> => {
   const params = new URLSearchParams();
   params.append('seed', uid);
-  if (config.top) params.append('top', config.top);
-  if (config.face) {
-    params.append('mouth', config.face);
-    params.append('eyes', config.face);
+  if (config.top && config.top !== 'blank') params.append('top', config.top);
+  if (config.face && config.face !== 'default') {
+    const mouthMap: Record<string, string> = {
+      smile: 'smile',
+      cry: 'sad',
+      dizzy: 'grimace',
+      rollEyes: 'disbelief',
+      surprised: 'screamOpen',
+      wink: 'twinkle',
+      winkWacky: 'tongue',
+      squint: 'serious',
+      sad: 'sad'
+    };
+    const eyesMap: Record<string, string> = {
+      smile: 'happy',
+      cry: 'cry',
+      dizzy: 'xDizzy',
+      rollEyes: 'eyeRoll',
+      surprised: 'surprised',
+      wink: 'wink',
+      winkWacky: 'winkWacky',
+      squint: 'squint',
+      sad: 'closed'
+    };
+    if (mouthMap[config.face]) params.append('mouth', mouthMap[config.face]);
+    if (eyesMap[config.face]) params.append('eyes', eyesMap[config.face]);
   }
-  if (config.accessories) params.append('accessories', config.accessories);
-  if (config.clothing) params.append('clothing', config.clothing);
-  if (config.facialHair) params.append('facialHair', config.facialHair);
+  if (config.accessories && config.accessories !== 'blank') params.append('accessories', config.accessories);
+  if (config.clothing && config.clothing !== 'blank') params.append('clothing', config.clothing);
+  if (config.facialHair && config.facialHair !== 'blank') params.append('facialHair', config.facialHair);
   
   const url = `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
   
   try {
     const res = await fetch(url);
+    if (!res.ok) {
+      console.error('DiceBear API error:', await res.text());
+      return url;
+    }
     let svgText = await res.text();
     
     // Change viewBox and height to accommodate legs
-    svgText = svgText.replace('viewBox="0 0 264 280"', 'viewBox="0 0 264 400"');
-    svgText = svgText.replace(/height="280"/g, 'height="400"');
+    svgText = svgText.replace(/viewBox="[^"]+"/, 'viewBox="0 0 280 400" width="280" height="400"');
+    svgText = svgText.replace(/height="[^"]+"/, ''); // Remove existing height if any
     
     let shoesSvg = '';
     if (config.shoes === 'nike') {
@@ -65,18 +118,19 @@ export const generateCompositeAvatar = async (uid: string, config: AvatarConfig)
     }
 
     let brandSvg = '';
-    const nikeSecret = (import.meta as any).env.VITE_NIKE_SECRET;
-    const gucciSecret = (import.meta as any).env.VITE_GUCCI_SECRET;
+    const env = (import.meta as any).env || {};
+    const nikeSecret = env.VITE_NIKE_SECRET;
+    const gucciSecret = env.VITE_GUCCI_SECRET;
 
     if (config.brand === 'nike') {
       if (nikeSecret) {
-        brandSvg = `<image href="${nikeSecret}" x="100" y="200" width="60" height="30" />`;
+        brandSvg = await fetchAndEmbedImage(nikeSecret, 110, 200, 60, 30);
       } else {
         brandSvg = `<path d="M 110 210 Q 130 230 150 200 Q 135 215 110 210 Z" fill="#ffffff" stroke="#000000" stroke-width="1"/>`;
       }
     } else if (config.brand === 'gucci') {
       if (gucciSecret) {
-        brandSvg = `<image href="${gucciSecret}" x="100" y="200" width="60" height="30" />`;
+        brandSvg = await fetchAndEmbedImage(gucciSecret, 110, 200, 60, 30);
       } else {
         brandSvg = `
           <rect x="110" y="205" width="40" height="12" fill="#15803d" />
