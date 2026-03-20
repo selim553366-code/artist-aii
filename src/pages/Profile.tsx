@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { Heart, MessageCircle, Image as ImageIcon, Video as VideoIcon } from 'lucide-react';
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, getDocs, writeBatch } from 'firebase/firestore';
+import { Heart, MessageCircle, Image as ImageIcon, Video as VideoIcon, Pencil } from 'lucide-react';
+import AvatarEditor from '../components/AvatarEditor';
 
 interface Post {
   id: string;
@@ -16,6 +17,33 @@ interface Post {
 export default function Profile() {
   const { user, profile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+
+  const handleSaveAvatar = async (newUrl: string) => {
+    if (!user) return;
+    
+    try {
+      // Update user profile
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { photoURL: newUrl });
+
+      // Update all posts by this user to reflect the new avatar
+      const q = query(collection(db, 'posts'), where('authorId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const batch = writeBatch(db);
+        querySnapshot.forEach((postDoc) => {
+          batch.update(postDoc.ref, { authorPhoto: newUrl });
+        });
+        await batch.commit();
+      }
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+    }
+    
+    setIsEditingAvatar(false);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -40,11 +68,16 @@ export default function Profile() {
     <div className="max-w-4xl mx-auto py-12 px-4">
       {/* Profile Header */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
-        <img
-          src={profile.photoURL || undefined}
-          alt={profile.displayName}
-          className="w-32 h-32 rounded-full border-4 border-zinc-800 shadow-xl"
-        />
+        <div className="relative group cursor-pointer" onClick={() => setIsEditingAvatar(true)}>
+          <img
+            src={profile.photoURL || undefined}
+            alt={profile.displayName}
+            className="w-32 h-32 rounded-full border-4 border-zinc-800 shadow-xl object-cover transition-opacity group-hover:opacity-50"
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Pencil className="text-white" size={32} />
+          </div>
+        </div>
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl font-bold text-white mb-2">{profile.displayName}</h1>
           <p className="text-indigo-400 font-medium mb-6 uppercase tracking-wider text-sm">
@@ -106,6 +139,16 @@ export default function Profile() {
         <div className="text-center py-12 text-zinc-500">
           You haven't posted anything yet.
         </div>
+      )}
+      {/* Avatar Editor Modal */}
+      {user && profile && (
+        <AvatarEditor
+          isOpen={isEditingAvatar}
+          onClose={() => setIsEditingAvatar(false)}
+          onSave={handleSaveAvatar}
+          currentUrl={profile.photoURL}
+          uid={user.uid}
+        />
       )}
     </div>
   );

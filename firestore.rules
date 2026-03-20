@@ -89,7 +89,10 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated() && isValidPost();
       allow update: if isAuthenticated() && 
-                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount']));
+                    (
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount'])) ||
+                      (isDocOwner() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorPhoto']))
+                    );
       allow delete: if isDocOwner();
     }
 
