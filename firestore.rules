@@ -38,7 +38,6 @@ service cloud.firestore {
       return request.resource.data.displayName is string &&
              request.resource.data.plan in ['standard', 'premium'] &&
              request.resource.data.imagesLeft is number &&
-             request.resource.data.videosLeft is number &&
              request.resource.data.followersCount is number &&
              request.resource.data.followingCount is number;
     }
@@ -47,7 +46,7 @@ service cloud.firestore {
       return request.resource.data.authorId == request.auth.uid &&
              request.resource.data.authorName is string &&
              request.resource.data.mediaUrl is string &&
-             request.resource.data.mediaType in ['image', 'video'] &&
+             request.resource.data.mediaType == 'image' &&
              request.resource.data.prompt is string &&
              request.resource.data.likesCount is number &&
              request.resource.data.commentsCount is number &&

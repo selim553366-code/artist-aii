@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
-import { Image as ImageIcon, Video as VideoIcon, Loader2, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
 
 let ai: GoogleGenAI | null = null;
 try {
@@ -17,8 +17,6 @@ try {
 export default function Create() {
   const { user, profile } = useAuth();
   const [prompt, setPrompt] = useState('');
-  const [type, setType] = useState<'image' | 'video'>('image');
-  const [videoLength, setVideoLength] = useState<'5s' | '10s'>('5s');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,67 +33,27 @@ export default function Create() {
       }
 
       // Check credits
-      if (type === 'image' && profile.imagesLeft <= 0) {
+      if (profile.imagesLeft <= 0) {
         throw new Error('No image credits left. Please upgrade to Premium.');
-      }
-      if (type === 'video' && profile.videosLeft <= 0) {
-        throw new Error('No video credits left. Please upgrade to Premium.');
       }
 
       let generatedUrl = '';
 
-      if (type === 'image') {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.1-flash-image-preview',
-          contents: { parts: [{ text: prompt }] },
-          config: {
-            imageConfig: {
-              aspectRatio: "1:1",
-              imageSize: "1K"
-            }
-          }
-        });
-
-        for (const part of response.candidates?.[0]?.content?.parts || []) {
-          if (part.inlineData) {
-            generatedUrl = `data:image/png;base64,${part.inlineData.data}`;
-            break;
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: { parts: [{ text: prompt }] },
+        config: {
+          imageConfig: {
+            aspectRatio: "1:1"
           }
         }
-      } else {
-        // Video Generation
-        const isPremium = profile.plan === 'premium';
-        if (videoLength === '10s' && !isPremium) {
-          throw new Error('10s videos are only available on Premium plan.');
+      });
+
+      for (const part of response.candidates?.[0]?.content?.parts || []) {
+        if (part.inlineData) {
+          generatedUrl = `data:image/png;base64,${part.inlineData.data}`;
+          break;
         }
-
-        const resolution = isPremium ? '1080p' : '720p'; // Simulating 4K with 1080p since API limits
-        const finalPrompt = videoLength === '10s' ? `${prompt} (10 seconds long)` : prompt;
-        
-        let operation = await ai.models.generateVideos({
-          model: 'veo-3.1-fast-generate-preview',
-          prompt: finalPrompt,
-          config: {
-            numberOfVideos: 1,
-            resolution: resolution as any,
-            aspectRatio: '16:9'
-          }
-        });
-
-        while (!operation.done) {
-          await new Promise(resolve => setTimeout(resolve, 10000));
-          operation = await ai.operations.getVideosOperation({ operation });
-        }
-
-        const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-        if (!downloadLink) throw new Error('Failed to generate video.');
-
-        // Fetch the video to get a base64 or blob URL (simplified for demo, usually we'd upload to Storage)
-        const videoResponse = await fetch(downloadLink, {
-          headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY || '' }
-        });
-        const blob = await videoResponse.blob();
-        generatedUrl = URL.createObjectURL(blob);
       }
 
       if (!generatedUrl) throw new Error('Generation failed.');
@@ -105,11 +63,15 @@ export default function Create() {
       // Deduct credit
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
-        [type === 'image' ? 'imagesLeft' : 'videosLeft']: increment(-1)
+        imagesLeft: increment(-1)
       });
 
     } catch (err: any) {
-      setError(err.message || 'An error occurred during generation.');
+      let errorMessage = err.message || 'An error occurred during generation.';
+      if (errorMessage.includes('403') || errorMessage.includes('PERMISSION_DENIED')) {
+        errorMessage = 'API Key permission denied. Please ensure your Gemini API key is correct and has the Generative Language API enabled.';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -123,7 +85,7 @@ export default function Create() {
         authorName: profile.displayName,
         authorPhoto: profile.photoURL,
         mediaUrl: result,
-        mediaType: type,
+        mediaType: 'image',
         prompt,
         likesCount: 0,
         commentsCount: 0,
@@ -149,47 +111,6 @@ export default function Create() {
       </h1>
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => setType('image')}
-            className={`flex-1 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors ${
-              type === 'image' ? 'bg-indigo-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-            }`}
-          >
-            <ImageIcon size={20} /> Image
-          </button>
-          <button
-            onClick={() => setType('video')}
-            className={`flex-1 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors ${
-              type === 'video' ? 'bg-indigo-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-            }`}
-          >
-            <VideoIcon size={20} /> Video
-          </button>
-        </div>
-
-        {type === 'video' && (
-          <div className="mb-6 flex gap-4">
-            <button
-              onClick={() => setVideoLength('5s')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                videoLength === '5s' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-              }`}
-            >
-              5 Seconds
-            </button>
-            <button
-              onClick={() => setVideoLength('10s')}
-              disabled={profile?.plan !== 'premium'}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                videoLength === '10s' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-              } ${profile?.plan !== 'premium' ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              10 Seconds {profile?.plan !== 'premium' && '(Premium)'}
-            </button>
-          </div>
-        )}
-
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -199,7 +120,7 @@ export default function Create() {
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-zinc-400">
-            Credits remaining: <strong className="text-white">{type === 'image' ? profile?.imagesLeft : profile?.videosLeft}</strong>
+            Credits remaining: <strong className="text-white">{profile?.imagesLeft}</strong>
           </div>
           <button
             onClick={handleGenerate}
@@ -217,11 +138,7 @@ export default function Create() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <h2 className="text-xl font-bold mb-4 text-white">Result</h2>
           <div className="aspect-square bg-zinc-950 rounded-xl overflow-hidden mb-4 flex items-center justify-center">
-            {type === 'video' ? (
-              <video src={result} controls className="w-full h-full object-contain" autoPlay loop />
-            ) : (
-              <img src={result} alt="Generated" className="w-full h-full object-contain" />
-            )}
+            <img src={result} alt="Generated" className="w-full h-full object-contain" />
           </div>
           <button
             onClick={handleShare}

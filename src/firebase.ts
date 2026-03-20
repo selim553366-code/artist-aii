@@ -19,7 +19,6 @@ export const loginWithGoogle = async () => {
         photoURL: result.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`,
         plan: 'standard',
         imagesLeft: 10,
-        videosLeft: 2,
         followersCount: 0,
         followingCount: 0
       });
@@ -39,7 +38,6 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
       photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`,
       plan: 'standard',
       imagesLeft: 10,
-      videosLeft: 2,
       followersCount: 0,
       followingCount: 0
     });

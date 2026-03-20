@@ -26,8 +26,7 @@ export default function Subscription() {
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
         plan: 'premium',
-        imagesLeft: 50,
-        videosLeft: 10
+        imagesLeft: 50
       });
       alert('Successfully upgraded to Premium! (Mock Mode)');
     } catch (err) {
@@ -71,15 +70,7 @@ export default function Subscription() {
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-500" size={20} />
-              <span>2 Videos per month</span>
-            </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-500" size={20} />
-              <span>720p Video Resolution</span>
-            </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-500" size={20} />
-              <span>5 Second Videos</span>
+              <span>Standard Generation Speed</span>
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-500" size={20} />
@@ -116,19 +107,11 @@ export default function Subscription() {
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
-              <span className="font-medium text-white">10 Videos per month</span>
-            </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-400" size={20} />
-              <span className="font-medium text-white">4K Video Resolution</span>
-            </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-400" size={20} />
-              <span className="font-medium text-white">5 or 10 Second Videos</span>
-            </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-400" size={20} />
               <span>Priority Generation Speed</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-400" size={20} />
+              <span>Early Access to New Models</span>
             </li>
           </ul>
           <button

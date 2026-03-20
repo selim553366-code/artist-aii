@@ -9,7 +9,6 @@ export interface UserProfile {
   photoURL: string;
   plan: 'standard' | 'premium';
   imagesLeft: number;
-  videosLeft: number;
   followersCount: number;
   followingCount: number;
 }
