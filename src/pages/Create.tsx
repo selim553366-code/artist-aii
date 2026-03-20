@@ -181,16 +181,16 @@ export default function Create() {
           className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-32 mb-4"
         />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-zinc-400 flex flex-col gap-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="text-sm text-zinc-400 flex flex-col gap-1 w-full sm:w-auto">
             <span>Credits remaining: <strong className="text-white">{profile?.imagesLeft}</strong></span>
             <span className="flex items-center gap-1"><Coins size={14} className="text-yellow-500"/> ArCredits: <strong className="text-white">{profile?.arCredits || 0}</strong> <span className="text-xs ml-1">(= {Math.floor((profile?.arCredits || 0) / 1000)} Photos)</span></span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button
               onClick={() => handleGenerate(false)}
               disabled={loading || !prompt}
-              className="bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+              className="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
               Generate
@@ -198,7 +198,7 @@ export default function Create() {
             <button
               onClick={() => handleGenerate(true)}
               disabled={loading || !prompt || (profile?.arCredits || 0) < 1000}
-              className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+              className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
               title="Cost: 1000 ArCredits"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Coins size={20} />}
@@ -223,7 +223,7 @@ export default function Create() {
               placeholder="Enter a name for your NFT..."
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={handleShare}
                 className="flex-1 bg-white text-black hover:bg-zinc-200 py-3 rounded-xl font-semibold transition-colors"

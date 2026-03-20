@@ -296,11 +296,11 @@ export default function NFTMarket() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold text-white flex items-center gap-3">
           <ShoppingBag className="text-purple-500" /> NFT Market
         </h1>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 flex items-center gap-2">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 flex items-center gap-2 w-full sm:w-auto">
           <Coins className="text-yellow-500" size={20} />
           <span className="text-white font-bold">{profile?.arCredits || 0} ArCredits</span>
           <span className="text-zinc-500 text-sm ml-2">= {Math.floor((profile?.arCredits || 0) / 1000)} Photos</span>

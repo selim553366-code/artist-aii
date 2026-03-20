@@ -55,7 +55,7 @@ export default function Profile() {
             {profile.plan} Artist
           </p>
           
-          <div className="flex justify-center md:justify-start gap-8 text-zinc-300">
+          <div className="flex flex-wrap justify-center md:justify-start gap-4 sm:gap-8 text-zinc-300">
             <div className="text-center">
               <span className="block text-2xl font-bold text-white">{posts.length}</span>
               <span className="text-sm text-zinc-500">Posts</span>
