@@ -103,7 +103,7 @@ export default function Subscription() {
           <ul className="space-y-4 mb-8 flex-1">
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
-              <span className="font-medium text-white">50 Images per month</span>
+              <span className="font-medium text-white">50 Images per week</span>
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
