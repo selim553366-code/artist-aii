@@ -3,9 +3,11 @@ export interface AvatarConfig {
   face: string;
   accessories: string;
   clothing: string;
+  clothingColor: string;
   facialHair: string;
   shoes: string;
   brand: string;
+  customAccessory: string;
 }
 
 export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
@@ -13,9 +15,11 @@ export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
   face: 'default',
   accessories: 'blank',
   clothing: 'shirtCrewNeck',
+  clothingColor: 'gray02',
   facialHair: 'blank',
   shoes: 'default',
-  brand: 'none'
+  brand: 'none',
+  customAccessory: 'none'
 };
 
 const fetchAndEmbedImage = async (url: string, x: number, y: number, width: number, height: number): Promise<string> => {
@@ -77,6 +81,7 @@ export const generateCompositeAvatar = async (uid: string, config: AvatarConfig)
   }
   if (config.accessories && config.accessories !== 'blank') params.append('accessories', config.accessories);
   if (config.clothing && config.clothing !== 'blank') params.append('clothing', config.clothing);
+  if (config.clothingColor) params.append('clothingColor', config.clothingColor);
   if (config.facialHair && config.facialHair !== 'blank') params.append('facialHair', config.facialHair);
   
   const url = `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
@@ -94,26 +99,42 @@ export const generateCompositeAvatar = async (uid: string, config: AvatarConfig)
     svgText = svgText.replace(/height="[^"]+"/, ''); // Remove existing height if any
     
     let shoesSvg = '';
-    if (config.shoes === 'nike') {
+    if (config.shoes === 'nikeDunkPanda') {
       shoesSvg = `
-        <path d="M 85 370 Q 85 350 115 350 L 125 350 L 125 390 L 95 390 Q 85 390 85 370 Z" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
-        <path d="M 90 365 Q 105 380 120 360 Q 110 365 90 365 Z" fill="#000000"/>
-        <path d="M 135 370 Q 135 350 165 350 L 175 350 L 175 390 L 145 390 Q 135 390 135 370 Z" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
-        <path d="M 140 365 Q 155 380 170 360 Q 160 365 140 365 Z" fill="#000000"/>
+        <path d="M 85 370 Q 85 350 115 350 L 125 350 L 125 390 L 95 390 Q 85 390 85 370 Z" fill="#ffffff" stroke="#171717" stroke-width="2"/>
+        <path d="M 85 370 Q 85 350 105 350 L 105 390 L 95 390 Q 85 390 85 370 Z" fill="#171717"/>
+        <path d="M 90 365 Q 105 380 120 360 Q 110 365 90 365 Z" fill="#171717"/>
+        <path d="M 135 370 Q 135 350 165 350 L 175 350 L 175 390 L 145 390 Q 135 390 135 370 Z" fill="#ffffff" stroke="#171717" stroke-width="2"/>
+        <path d="M 135 370 Q 135 350 155 350 L 155 390 L 145 390 Q 135 390 135 370 Z" fill="#171717"/>
+        <path d="M 140 365 Q 155 380 170 360 Q 160 365 140 365 Z" fill="#171717"/>
       `;
     } else if (config.shoes === 'gucci') {
       shoesSvg = `
-        <rect x="85" y="360" width="40" height="30" rx="8" fill="#171717" />
+        <rect x="85" y="360" width="40" height="30" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
         <rect x="85" y="370" width="40" height="6" fill="#15803d" />
         <rect x="85" y="372" width="40" height="2" fill="#b91c1c" />
-        <rect x="135" y="360" width="40" height="30" rx="8" fill="#171717" />
+        <rect x="135" y="360" width="40" height="30" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
         <rect x="135" y="370" width="40" height="6" fill="#15803d" />
         <rect x="135" y="372" width="40" height="2" fill="#b91c1c" />
       `;
+    } else if (config.shoes === 'timberland') {
+      shoesSvg = `
+        <rect x="90" y="350" width="30" height="40" rx="5" fill="#d97706" stroke="#b45309" stroke-width="2" />
+        <rect x="90" y="380" width="30" height="10" fill="#171717" />
+        <rect x="140" y="350" width="30" height="40" rx="5" fill="#d97706" stroke="#b45309" stroke-width="2" />
+        <rect x="140" y="380" width="30" height="10" fill="#171717" />
+      `;
+    } else if (config.shoes === 'sandals') {
+      shoesSvg = `
+        <path d="M 85 380 L 125 380 L 125 390 L 85 390 Z" fill="#78350f" />
+        <path d="M 95 380 Q 105 360 115 380" fill="none" stroke="#78350f" stroke-width="4" />
+        <path d="M 135 380 L 175 380 L 175 390 L 135 390 Z" fill="#78350f" />
+        <path d="M 145 380 Q 155 360 165 380" fill="none" stroke="#78350f" stroke-width="4" />
+      `;
     } else {
       shoesSvg = `
-        <rect x="90" y="360" width="30" height="30" rx="10" fill="#374151" />
-        <rect x="140" y="360" width="30" height="30" rx="10" fill="#374151" />
+        <rect x="90" y="360" width="30" height="30" rx="10" fill="#ffffff" stroke="#e5e7eb" stroke-width="2" />
+        <rect x="140" y="360" width="30" height="30" rx="10" fill="#ffffff" stroke="#e5e7eb" stroke-width="2" />
       `;
     }
 
@@ -137,14 +158,51 @@ export const generateCompositeAvatar = async (uid: string, config: AvatarConfig)
           <rect x="110" y="209" width="40" height="4" fill="#b91c1c" />
         `;
       }
+    } else if (config.brand === 'fila') {
+      brandSvg = `
+        <rect x="115" y="205" width="30" height="20" fill="#1e3a8a" />
+        <rect x="115" y="205" width="30" height="10" fill="#dc2626" />
+        <text x="130" y="219" fill="#ffffff" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">FILA</text>
+      `;
+    } else if (config.brand === 'adidas') {
+      brandSvg = `
+        <rect x="120" y="206" width="4" height="12" fill="#ffffff" transform="rotate(-20 122 212)" />
+        <rect x="128" y="204" width="4" height="16" fill="#ffffff" transform="rotate(-20 130 212)" />
+        <rect x="136" y="202" width="4" height="20" fill="#ffffff" transform="rotate(-20 138 212)" />
+      `;
+    } else if (config.brand === 'champion') {
+      brandSvg = `
+        <path d="M 135 205 A 10 10 0 1 0 135 225 A 10 10 0 0 0 135 205" fill="none" stroke="#dc2626" stroke-width="4" />
+        <rect x="130" y="213" width="10" height="4" fill="#1e3a8a" />
+      `;
+    }
+
+    let customAccSvg = '';
+    if (config.customAccessory === 'gucciBelt') {
+      customAccSvg = `
+        <rect x="90" y="235" width="80" height="12" fill="#171717"/>
+        <circle cx="130" cy="241" r="8" fill="#fbbf24"/>
+        <circle cx="130" cy="241" r="5" fill="#171717"/>
+      `;
+    } else if (config.customAccessory === 'jordanNecklace') {
+      customAccSvg = `
+        <path d="M 115 170 L 130 200 L 145 170" fill="none" stroke="#fbbf24" stroke-width="2"/>
+        <circle cx="130" cy="205" r="6" fill="#fbbf24"/>
+      `;
+    } else if (config.customAccessory === 'nikeWristband') {
+      customAccSvg = `
+        <rect x="175" y="220" width="15" height="20" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" transform="rotate(15 182 230)" />
+        <path d="M 178 228 Q 182 232 188 225 Q 185 228 178 228 Z" fill="#000000" transform="rotate(15 182 230)" />
+      `;
     }
 
     const injection = `
       <g id="custom-lower-body">
-        <rect x="95" y="240" width="25" height="140" fill="#1e3a8a" />
-        <rect x="145" y="240" width="25" height="140" fill="#1e3a8a" />
+        <rect x="95" y="240" width="25" height="140" fill="#3b82f6" />
+        <rect x="145" y="240" width="25" height="140" fill="#3b82f6" />
         ${shoesSvg}
         ${brandSvg}
+        ${customAccSvg}
       </g>
     </svg>`;
     
