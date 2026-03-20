@@ -12,6 +12,7 @@ export interface UserProfile {
   imagesLeft: number;
   followersCount: number;
   followingCount: number;
+  arCredits: number;
 }
 
 interface AuthContextType {
@@ -45,6 +46,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (docSnap.exists()) {
           setProfile({ uid: user.uid, ...docSnap.data() } as UserProfile);
         }
+        setLoading(false);
+      }, (error) => {
+        console.error("Error fetching user profile:", error);
         setLoading(false);
       });
       return () => unsubscribeProfile();

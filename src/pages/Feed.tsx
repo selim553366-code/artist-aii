@@ -28,6 +28,8 @@ export default function Feed() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
       setPosts(newPosts);
+    }, (error) => {
+      console.error("Error fetching posts:", error);
     });
 
     // Fetch daily challenge (mocked for today)
