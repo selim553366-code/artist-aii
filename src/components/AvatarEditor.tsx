@@ -35,7 +35,16 @@ const OPTIONS: Record<CategoryId, string[]> = {
 const PREMIUM_ITEMS = ['nike', 'gucci'];
 
 export default function AvatarEditor({ isOpen, onClose, onSave, currentConfig, uid }: AvatarEditorProps) {
-  const [selections, setSelections] = useState<AvatarConfig>({ ...DEFAULT_AVATAR_CONFIG, ...currentConfig });
+  const [selections, setSelections] = useState<AvatarConfig>(() => {
+    const config = { ...DEFAULT_AVATAR_CONFIG, ...currentConfig };
+    // Ensure we don't use old invalid values
+    if (config.top && !OPTIONS.top.includes(config.top)) config.top = DEFAULT_AVATAR_CONFIG.top;
+    if (config.face && !OPTIONS.face.includes(config.face)) config.face = DEFAULT_AVATAR_CONFIG.face;
+    if (config.clothing && !OPTIONS.clothing.includes(config.clothing)) config.clothing = DEFAULT_AVATAR_CONFIG.clothing;
+    if (config.accessories && !OPTIONS.accessories.includes(config.accessories)) config.accessories = DEFAULT_AVATAR_CONFIG.accessories;
+    if (config.facialHair && !OPTIONS.facialHair.includes(config.facialHair)) config.facialHair = DEFAULT_AVATAR_CONFIG.facialHair;
+    return config;
+  });
   const [activeTab, setActiveTab] = useState<CategoryId>('top');
   const [saving, setSaving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -43,7 +52,13 @@ export default function AvatarEditor({ isOpen, onClose, onSave, currentConfig, u
 
   useEffect(() => {
     if (isOpen) {
-      setSelections({ ...DEFAULT_AVATAR_CONFIG, ...currentConfig });
+      const config = { ...DEFAULT_AVATAR_CONFIG, ...currentConfig };
+      if (config.top && !OPTIONS.top.includes(config.top)) config.top = DEFAULT_AVATAR_CONFIG.top;
+      if (config.face && !OPTIONS.face.includes(config.face)) config.face = DEFAULT_AVATAR_CONFIG.face;
+      if (config.clothing && !OPTIONS.clothing.includes(config.clothing)) config.clothing = DEFAULT_AVATAR_CONFIG.clothing;
+      if (config.accessories && !OPTIONS.accessories.includes(config.accessories)) config.accessories = DEFAULT_AVATAR_CONFIG.accessories;
+      if (config.facialHair && !OPTIONS.facialHair.includes(config.facialHair)) config.facialHair = DEFAULT_AVATAR_CONFIG.facialHair;
+      setSelections(config);
     }
   }, [isOpen, currentConfig]);
 
