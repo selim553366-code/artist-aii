@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, onSnapshot, orderBy, limit, addDoc, deleteDoc } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
+import { DEFAULT_AVATAR_CONFIG, generateCompositeAvatar } from './utils/avatar';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -14,9 +15,11 @@ export const loginWithGoogle = async () => {
     const userRef = doc(db, 'users', result.user.uid);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) {
+      const photoURL = result.user.photoURL || await generateCompositeAvatar(result.user.uid, DEFAULT_AVATAR_CONFIG);
       await setDoc(userRef, {
         displayName: result.user.displayName || 'User',
-        photoURL: result.user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`,
+        photoURL,
+        avatarConfig: DEFAULT_AVATAR_CONFIG,
         plan: 'standard',
         imagesLeft: 10,
         followersCount: 0,
@@ -33,9 +36,11 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     const userRef = doc(db, 'users', result.user.uid);
+    const photoURL = await generateCompositeAvatar(result.user.uid, DEFAULT_AVATAR_CONFIG);
     await setDoc(userRef, {
       displayName: displayName || email.split('@')[0],
-      photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.user.uid}`,
+      photoURL,
+      avatarConfig: DEFAULT_AVATAR_CONFIG,
       plan: 'standard',
       imagesLeft: 10,
       followersCount: 0,

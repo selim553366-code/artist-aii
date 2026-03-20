@@ -111,7 +111,7 @@ export default function Feed() {
             {/* Header */}
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center space-x-3">
-                <img src={post.authorPhoto || undefined} alt={post.authorName} className="w-10 h-10 rounded-full bg-zinc-800" />
+                <img src={post.authorPhoto || undefined} alt={post.authorName} className="w-10 h-10 rounded-full bg-zinc-800 object-cover object-top" />
                 <div>
                   <p className="font-semibold text-white flex items-center gap-2">
                     {post.authorName}
@@ -132,9 +132,9 @@ export default function Feed() {
             {/* Media */}
             <div className="aspect-square bg-zinc-950 relative">
               {post.mediaType === 'video' ? (
-                <video src={post.mediaUrl} controls className="w-full h-full object-cover" autoPlay loop muted />
+                <video src={post.mediaUrl || undefined} controls className="w-full h-full object-cover" autoPlay loop muted />
               ) : (
-                <img src={post.mediaUrl} alt={post.prompt} className="w-full h-full object-cover" />
+                <img src={post.mediaUrl || undefined} alt={post.prompt} className="w-full h-full object-cover" />
               )}
             </div>
 

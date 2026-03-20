@@ -19,13 +19,13 @@ export default function Profile() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
 
-  const handleSaveAvatar = async (newUrl: string) => {
+  const handleSaveAvatar = async (newUrl: string, newConfig: any) => {
     if (!user) return;
     
     try {
       // Update user profile
       const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { photoURL: newUrl });
+      await updateDoc(userRef, { photoURL: newUrl, avatarConfig: newConfig });
 
       // Update all posts by this user to reflect the new avatar
       const q = query(collection(db, 'posts'), where('authorId', '==', user.uid));
@@ -72,7 +72,7 @@ export default function Profile() {
           <img
             src={profile.photoURL || undefined}
             alt={profile.displayName}
-            className="w-32 h-32 rounded-full border-4 border-zinc-800 shadow-xl object-cover transition-opacity group-hover:opacity-50"
+            className="w-32 h-32 rounded-full border-4 border-zinc-800 shadow-xl object-cover object-top bg-zinc-800 transition-opacity group-hover:opacity-50"
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <Pencil className="text-white" size={32} />
@@ -111,9 +111,9 @@ export default function Profile() {
         {posts.map(post => (
           <div key={post.id} className="aspect-square bg-zinc-900 rounded-xl overflow-hidden relative group cursor-pointer">
             {post.mediaType === 'video' ? (
-              <video src={post.mediaUrl} className="w-full h-full object-cover" muted loop />
+              <video src={post.mediaUrl || undefined} className="w-full h-full object-cover" muted loop />
             ) : (
-              <img src={post.mediaUrl} alt="Post" className="w-full h-full object-cover" />
+              <img src={post.mediaUrl || undefined} alt="Post" className="w-full h-full object-cover" />
             )}
             
             {/* Overlay */}
@@ -146,7 +146,7 @@ export default function Profile() {
           isOpen={isEditingAvatar}
           onClose={() => setIsEditingAvatar(false)}
           onSave={handleSaveAvatar}
-          currentUrl={profile.photoURL}
+          currentConfig={profile.avatarConfig}
           uid={user.uid}
         />
       )}

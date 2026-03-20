@@ -7,6 +7,7 @@ export interface UserProfile {
   uid: string;
   displayName: string;
   photoURL: string;
+  avatarConfig?: any;
   plan: 'standard' | 'premium';
   imagesLeft: number;
   followersCount: number;

@@ -36,9 +36,9 @@ export default function Gallery() {
         {posts.map(post => (
           <div key={post.id} className="aspect-square bg-zinc-900 rounded-xl overflow-hidden relative group cursor-pointer">
             {post.mediaType === 'video' ? (
-              <video src={post.mediaUrl} className="w-full h-full object-cover" muted loop />
+              <video src={post.mediaUrl || undefined} className="w-full h-full object-cover" muted loop />
             ) : (
-              <img src={post.mediaUrl} alt="Post" className="w-full h-full object-cover" />
+              <img src={post.mediaUrl || undefined} alt="Post" className="w-full h-full object-cover" />
             )}
             
             {/* Overlay */}

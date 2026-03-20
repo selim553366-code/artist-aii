@@ -51,7 +51,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         {user ? (
           <div className="mt-auto pt-4 border-t border-zinc-800">
             <div className="flex items-center space-x-3 mb-4">
-              <img src={profile?.photoURL || undefined} alt="Profile" className="w-10 h-10 rounded-full" />
+              <img src={profile?.photoURL || undefined} alt="Profile" className="w-10 h-10 rounded-full object-cover object-top bg-zinc-800" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{profile?.displayName}</p>
                 <p className="text-xs text-zinc-400 truncate">{profile?.plan === 'premium' ? 'Premium' : 'Standard'}</p>
