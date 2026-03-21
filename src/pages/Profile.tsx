@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
-import { db } from '../firebase';
+import { db, auth, loginWithGoogle } from '../firebase';
+import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, updateDoc, increment } from 'firebase/firestore';
 import { Heart, MessageCircle, Image as ImageIcon, Video as VideoIcon, CheckCircle2 } from 'lucide-react';
 
@@ -35,7 +36,17 @@ export default function Profile() {
   }, [user]);
 
   if (!user || !profile) {
-    return <div className="p-8 text-center text-zinc-400">Please sign in to view your profile.</div>;
+    return (
+      <div className="p-8 text-center text-zinc-400 flex flex-col items-center gap-4">
+        <p>Please sign in to view your profile.</p>
+        <button 
+          onClick={loginWithGoogle}
+          className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-xl font-medium transition-colors"
+        >
+          Log In
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -93,9 +104,15 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2">
           <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-medium transition-colors">
             Edit Profile
+          </button>
+          <button 
+            onClick={() => signOut(auth)}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-2 rounded-xl font-medium transition-colors"
+          >
+            Log Out
           </button>
         </div>
       </div>
