@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 export interface UserProfile {
@@ -9,6 +9,7 @@ export interface UserProfile {
   photoURL: string;
   avatarConfig?: any;
   plan: 'standard' | 'premium';
+  isVerified?: boolean;
   imagesLeft: number;
   followersCount: number;
   followingCount: number;
@@ -42,9 +43,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (user) {
-      const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+      const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
         if (docSnap.exists()) {
-          setProfile({ uid: user.uid, ...docSnap.data() } as UserProfile);
+          const data = docSnap.data();
+          // Auto-fix for users who upgraded before arCredits were added
+          if (data.plan === 'premium' && data.arCredits === undefined) {
+            try {
+              await updateDoc(doc(db, 'users', user.uid), {
+                arCredits: 15000
+              });
+            } catch (e) {
+              console.error("Failed to auto-renew premium features", e);
+            }
+          }
+          setProfile({ uid: user.uid, ...data } as UserProfile);
         }
         setLoading(false);
       }, (error) => {

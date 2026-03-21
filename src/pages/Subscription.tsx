@@ -26,7 +26,8 @@ export default function Subscription() {
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
         plan: 'premium',
-        imagesLeft: 50
+        imagesLeft: 50,
+        arCredits: 15000
       });
       alert('Successfully upgraded to Premium! (Mock Mode)');
     } catch (err) {
@@ -45,10 +46,10 @@ export default function Subscription() {
     <div className="max-w-4xl mx-auto py-12 px-4">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold text-white mb-4">Choose Your Plan</h1>
-        <p className="text-xl text-zinc-400">Unlock the full potential of Artist AI.</p>
+        <p className="text-xl text-zinc-400">Unlock the full potential of Flix Ai.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
         {/* Standard Plan */}
         <div className={`bg-zinc-900 border ${profile?.plan === 'standard' ? 'border-indigo-500' : 'border-zinc-800'} rounded-3xl p-8 relative flex flex-col`}>
           {profile?.plan === 'standard' && (
@@ -103,23 +104,23 @@ export default function Subscription() {
           <ul className="space-y-4 mb-8 flex-1">
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
-              <span className="font-medium text-white">50 Images per week</span>
+              <span className="font-medium text-white">15,000 ArCredits</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-400" size={20} />
+              <span className="font-medium text-white">Blue Verification Tick</span>
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
               <span>Priority Generation Speed</span>
             </li>
-            <li className="flex items-center gap-3 text-zinc-300">
-              <Check className="text-indigo-400" size={20} />
-              <span>Early Access to New Models</span>
-            </li>
           </ul>
           <button
             onClick={handleUpgrade}
-            disabled={loading || profile?.plan === 'premium'}
+            disabled={loading}
             className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors shadow-lg shadow-indigo-500/25"
           >
-            {loading ? 'Processing...' : profile?.plan === 'premium' ? 'Active' : 'Upgrade to Premium'}
+            {loading ? 'Processing...' : profile?.plan === 'premium' ? 'Renew Premium (Mock)' : 'Upgrade to Premium'}
           </button>
         </div>
       </div>

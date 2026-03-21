@@ -132,7 +132,7 @@ export default function Feed() {
             </div>
 
             {/* Media */}
-            <div className="aspect-square bg-zinc-950 relative">
+            <div className="aspect-square bg-zinc-950 relative" onDoubleClick={() => handleLike(post.id)}>
               {post.mediaType === 'video' ? (
                 <video src={post.mediaUrl || undefined} controls className="w-full h-full object-cover" autoPlay loop muted />
               ) : (

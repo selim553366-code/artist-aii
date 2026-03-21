@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { Heart, MessageCircle, Image as ImageIcon, Video as VideoIcon } from 'lucide-react';
+import { collection, query, where, onSnapshot, doc, updateDoc, increment } from 'firebase/firestore';
+import { Heart, MessageCircle, Image as ImageIcon, Video as VideoIcon, CheckCircle2 } from 'lucide-react';
 
 interface Post {
   id: string;
@@ -50,10 +50,29 @@ export default function Profile() {
           />
         </div>
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-3xl font-bold text-white mb-2">{profile.displayName}</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 flex items-center justify-center md:justify-start gap-2">
+            {profile.displayName}
+            {profile.isVerified && <CheckCircle2 className="text-blue-500" size={24} />}
+          </h1>
           <p className="text-indigo-400 font-medium mb-6 uppercase tracking-wider text-sm">
             {profile.plan} Artist
           </p>
+          
+          {profile.plan !== 'premium' && (
+            <button 
+              onClick={async () => {
+                await updateDoc(doc(db, 'users', user.uid), {
+                  plan: 'premium',
+                  isVerified: true,
+                  arCredits: increment(15000)
+                });
+                alert('Upgraded to Premium! 15,000 ArCredits added.');
+              }}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-bold transition-colors mb-6"
+            >
+              Upgrade to Premium ($6.99)
+            </button>
+          )}
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4 sm:gap-8 text-zinc-300">
             <div className="text-center">
@@ -70,7 +89,7 @@ export default function Profile() {
             </div>
             <div className="text-center">
               <span className="block text-2xl font-bold text-yellow-500">{profile.arCredits || 0}</span>
-              <span className="text-sm text-zinc-500">ArCredits (= {Math.floor((profile.arCredits || 0) / 1000)} Photos)</span>
+              <span className="text-sm text-zinc-500">ArCredits</span>
             </div>
           </div>
         </div>
