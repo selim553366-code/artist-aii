@@ -17,6 +17,35 @@ interface Post {
 export default function Profile() {
   const { user, profile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  
+  // Edit Profile State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleEditProfileClick = () => {
+    setEditName(profile?.displayName || '');
+    setEditPhotoUrl(profile?.photoURL || '');
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        displayName: editName.trim(),
+        photoURL: editPhotoUrl.trim()
+      });
+      setIsEditingProfile(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -105,7 +134,10 @@ export default function Profile() {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-medium transition-colors">
+          <button 
+            onClick={handleEditProfileClick}
+            className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-medium transition-colors"
+          >
             Edit Profile
           </button>
           <button 
@@ -149,6 +181,53 @@ export default function Profile() {
       {posts.length === 0 && (
         <div className="text-center py-12 text-zinc-500">
           You haven't posted anything yet.
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-white mb-4">Edit Profile</h2>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Display Name</label>
+                <input 
+                  type="text" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Photo URL</label>
+                <input 
+                  type="text" 
+                  value={editPhotoUrl}
+                  onChange={(e) => setEditPhotoUrl(e.target.value)}
+                  placeholder="https://example.com/photo.jpg"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsEditingProfile(false)}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveProfile}
+                disabled={isSaving || !editName.trim()}
+                className="flex-1 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white py-2 rounded-xl font-medium transition-colors"
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
