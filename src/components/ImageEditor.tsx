@@ -115,7 +115,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorP
             <Undo size={16} />
           </button>
         </div>
-        <p className="text-xs text-zinc-400">Değiştirmek istediğiniz yeri işaretleyin</p>
+        <p className="text-xs text-zinc-400">Mark the area you want to change</p>
       </div>
 
       <div className="relative border border-zinc-700 rounded-xl overflow-hidden bg-zinc-950 touch-none">
@@ -134,10 +134,10 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorP
 
       <div className="flex gap-2 w-full mt-2">
         <button onClick={onCancel} className="flex-1 py-2 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors font-medium">
-          İptal
+          Cancel
         </button>
         <button onClick={handleSave} className="flex-1 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors font-medium">
-          İşaretlemeyi Bitir
+          Finish Marking
         </button>
       </div>
     </div>

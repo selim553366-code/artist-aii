@@ -20,6 +20,8 @@ export const loginWithGoogle = async () => {
         photoURL,
         plan: 'standard',
         imagesLeft: 10,
+        designerUsesLeft: 2,
+        editUsesLeft: 2,
         followersCount: 0,
         followingCount: 0,
         arCredits: 100
@@ -41,6 +43,8 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
       photoURL,
       plan: 'standard',
       imagesLeft: 10,
+      designerUsesLeft: 2,
+      editUsesLeft: 2,
       followersCount: 0,
       followingCount: 0,
       arCredits: 100

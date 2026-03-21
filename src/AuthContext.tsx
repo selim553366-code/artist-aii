@@ -11,6 +11,8 @@ export interface UserProfile {
   plan: 'standard' | 'premium';
   isVerified?: boolean;
   imagesLeft: number;
+  designerUsesLeft?: number;
+  editUsesLeft?: number;
   followersCount: number;
   followingCount: number;
   arCredits: number;
@@ -46,17 +48,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
+          let needsUpdate = false;
+          const updates: any = {};
+
           // Auto-fix for users who upgraded before arCredits were added
           if (data.plan === 'premium' && data.arCredits === undefined) {
+            updates.arCredits = 15000;
+            needsUpdate = true;
+          }
+          
+          if (data.designerUsesLeft === undefined) {
+            updates.designerUsesLeft = data.plan === 'premium' ? 15 : 2;
+            needsUpdate = true;
+          }
+          
+          if (data.editUsesLeft === undefined) {
+            updates.editUsesLeft = data.plan === 'premium' ? 15 : 2;
+            needsUpdate = true;
+          }
+
+          if (needsUpdate) {
             try {
-              await updateDoc(doc(db, 'users', user.uid), {
-                arCredits: 15000
-              });
+              await updateDoc(doc(db, 'users', user.uid), updates);
             } catch (e) {
-              console.error("Failed to auto-renew premium features", e);
+              console.error("Failed to auto-renew features", e);
             }
           }
-          setProfile({ uid: user.uid, ...data } as UserProfile);
+
+          setProfile({ uid: user.uid, ...data, ...updates } as UserProfile);
         }
         setLoading(false);
       }, (error) => {

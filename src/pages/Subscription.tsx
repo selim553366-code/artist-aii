@@ -27,6 +27,8 @@ export default function Subscription() {
       await updateDoc(userRef, {
         plan: 'premium',
         imagesLeft: 50,
+        designerUsesLeft: 15,
+        editUsesLeft: 15,
         arCredits: 15000
       });
       alert('Successfully upgraded to Premium! (Mock Mode)');
@@ -75,6 +77,14 @@ export default function Subscription() {
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-500" size={20} />
+              <span>2 AI Designer uses per month</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-500" size={20} />
+              <span>2 Image Edits per month</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-500" size={20} />
               <span>Access to Daily Challenges</span>
             </li>
           </ul>
@@ -109,6 +119,14 @@ export default function Subscription() {
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />
               <span className="font-medium text-white">Blue Verification Tick</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-400" size={20} />
+              <span>15 AI Designer uses per month</span>
+            </li>
+            <li className="flex items-center gap-3 text-zinc-300">
+              <Check className="text-indigo-400" size={20} />
+              <span>15 Image Edits per month</span>
             </li>
             <li className="flex items-center gap-3 text-zinc-300">
               <Check className="text-indigo-400" size={20} />

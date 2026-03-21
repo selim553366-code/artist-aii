@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
-import { Image as ImageIcon, Loader2, Sparkles, Coins, Edit3, Share2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Sparkles, Coins, Edit3, Share2, Download } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 import ImageEditor from '../components/ImageEditor';
 
@@ -126,9 +126,9 @@ export default function Create() {
       }
       const aiClient = new GoogleGenAI({ apiKey: currentApiKey });
 
-      // Check credits for editing (costs 1 image credit)
-      if (profile.imagesLeft <= 0 && (profile.arCredits || 0) < 1000) {
-        throw new Error('No credits left to edit. Please upgrade or use ArCredits.');
+      // Check credits for editing (costs 1 edit credit)
+      if ((profile.editUsesLeft || 0) <= 0) {
+        throw new Error('No edit credits left. Please upgrade to Premium for more edits.');
       }
 
       const base64Data = markedImage.split(',')[1];
@@ -169,11 +169,7 @@ export default function Create() {
 
       // Deduct credit
       const userRef = doc(db, 'users', user.uid);
-      if (profile.imagesLeft > 0) {
-        await updateDoc(userRef, { imagesLeft: increment(-1) });
-      } else {
-        await updateDoc(userRef, { arCredits: increment(-1000) });
-      }
+      await updateDoc(userRef, { editUsesLeft: increment(-1) });
 
     } catch (err: any) {
       let errorMessage = err.message || 'An error occurred during editing.';
@@ -231,7 +227,7 @@ export default function Create() {
 
       {result && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 text-white">Sonuç</h2>
+          <h2 className="text-xl font-bold mb-4 text-white">Result</h2>
           
           {isEditing ? (
             <div className="mb-4">
@@ -247,11 +243,11 @@ export default function Create() {
                     <img src={markedImage} alt="Marked" className="w-full h-full object-contain" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm text-zinc-400 font-medium">Nasıl bir değişiklik istiyorsunuz?</label>
+                    <label className="text-sm text-zinc-400 font-medium">What do you want to change?</label>
                     <textarea
                       value={editPrompt}
                       onChange={(e) => setEditPrompt(e.target.value)}
-                      placeholder="Örn: İşaretli alanı sevimli bir kediye dönüştür..."
+                      placeholder="e.g.: Turn the marked area into a cute cat..."
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24"
                     />
                   </div>
@@ -260,7 +256,7 @@ export default function Create() {
                       onClick={() => { setMarkedImage(null); setIsEditing(false); }}
                       className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-semibold transition-colors"
                     >
-                      İptal
+                      Cancel
                     </button>
                     <button
                       onClick={handleEditGenerate}
@@ -268,7 +264,7 @@ export default function Create() {
                       className="flex-1 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
                     >
                       {editLoading ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
-                      Düzenle
+                      Edit
                     </button>
                   </div>
                 </div>
@@ -285,14 +281,22 @@ export default function Create() {
                   className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                 >
                   <Edit3 size={18} />
-                  Fotoğrafı Düzenle
+                  Edit Photo ({profile?.editUsesLeft || 0} left)
                 </button>
+                <a
+                  href={result}
+                  download="flix-ai-image.png"
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download size={18} />
+                  Download
+                </a>
                 <button
                   onClick={handleShare}
                   className="flex-1 bg-white text-black hover:bg-zinc-200 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                 >
                   <Share2 size={18} />
-                  Paylaş
+                  Share
                 </button>
               </div>
             </>

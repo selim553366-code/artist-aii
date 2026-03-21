@@ -83,8 +83,8 @@ export default function Designer() {
       setChatHistory([...newHistory, { role: 'model', parts: [{ text: responseText }] }]);
 
       if (imagePrompt) {
-        if ((profile?.imagesLeft || 0) <= 0 && (profile?.arCredits || 0) < 1000) {
-          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: "You don't have enough image credits or ArCredits to generate a design. Please upgrade to Premium or get more credits." }]);
+        if ((profile?.designerUsesLeft || 0) <= 0) {
+          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: "You have run out of AI Designer uses for this month. Please upgrade to Premium for more." }]);
           setIsTyping(false);
           return;
         }
@@ -109,11 +109,7 @@ export default function Designer() {
               
               // Deduct credit
               const userRef = doc(db, 'users', user.uid);
-              if ((profile?.imagesLeft || 0) > 0) {
-                await updateDoc(userRef, { imagesLeft: increment(-1) });
-              } else {
-                await updateDoc(userRef, { arCredits: increment(-1000) });
-              }
+              await updateDoc(userRef, { designerUsesLeft: increment(-1) });
               
               break;
             }
@@ -200,6 +196,7 @@ export default function Designer() {
           <div className="flex items-center gap-2">
             <Layout className="text-zinc-400" />
             <h2 className="font-bold text-white">Design Preview</h2>
+            <span className="text-xs text-zinc-500 ml-2">({profile?.designerUsesLeft || 0} uses left)</span>
           </div>
           {currentImage && (
             <a
